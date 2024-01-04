@@ -428,7 +428,6 @@ static void movewordedge(int dir) {
 }
 
 static void keypress(XKeyEvent *ev) {
-  int i;
   char buf[64];
   int len;
   KeySym ksym = NoSymbol;
@@ -627,12 +626,12 @@ static void keypress(XKeyEvent *ev) {
       break;
     }
   case XK_KP_Left:
-    for (i = 0; i < lines; i++)
-      if (sel && sel->left && (sel = sel->left)->right == curr) {
-        curr = prev;
-        calcoffsets();
-      }
-    break;
+    if (cursor > 0 && (!sel || !sel->left || lines > 0)) {
+      cursor = nextrune(-1);
+      break;
+    }
+    if (lines > 0)
+      return;
     /* fallthrough */
   case XK_Up:
   case XK_KP_Up:
@@ -692,12 +691,12 @@ static void keypress(XKeyEvent *ev) {
       break;
     }
   case XK_KP_Right:
-    for (int i = 0; i < lines; i++)
-      if (sel && sel->right && (sel = sel->right) == next) {
-        curr = next;
-        calcoffsets();
-      }
-    break;
+    if (text[cursor] != '\0') {
+      cursor = nextrune(+1);
+      break;
+    }
+    if (lines > 0)
+      return;
     /* fallthrough */
   case XK_Down:
   case XK_KP_Down:
