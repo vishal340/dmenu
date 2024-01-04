@@ -183,7 +183,7 @@ static void drawmenu(void) {
   drw_rect(drw, 0, 0, mw, mh, 1, 1);
 
   if (prompt && *prompt) {
-    drw_setscheme(drw, scheme[SchemeSel]);
+    drw_setscheme(drw, scheme[SchemeNorm]);
     x = drw_text(drw, x, 0, promptw, bh, lrpad / 2, prompt, 0);
   }
   /* draw input field */
@@ -333,7 +333,7 @@ void fuzzymatch(void) {
     }
     free(fuzzymatches);
   }
-  curr = sel = matches;
+  curr = matches;
   calcoffsets();
 }
 
@@ -603,8 +603,10 @@ static void keypress(XKeyEvent *ev) {
     break;
   case XK_Left:
     if (columns > 1) {
-      if (!sel)
+      if (!sel) {
+        system("xdotool key KP_Left");
         return;
+      }
       tmpsel = sel;
       for (i = 0; i < lines; i++) {
         if (!tmpsel->left || tmpsel->left->right != tmpsel) {
@@ -636,6 +638,8 @@ static void keypress(XKeyEvent *ev) {
     if (sel && sel->left && (sel = sel->left)->right == curr) {
       curr = prev;
       calcoffsets();
+    } else if (sel && !sel->left) {
+      sel = NULL;
     }
     break;
   case XK_Next:
@@ -664,8 +668,10 @@ static void keypress(XKeyEvent *ev) {
     break;
   case XK_Right:
     if (columns > 1) {
-      if (!sel)
+      if (!sel) {
+        system("xdotool key KP_Right");
         return;
+      }
       tmpsel = sel;
       for (i = 0; i < lines; i++) {
         if (!tmpsel->right || tmpsel->right->left != tmpsel) {
@@ -697,6 +703,8 @@ static void keypress(XKeyEvent *ev) {
     if (sel && sel->right && (sel = sel->right) == next) {
       curr = next;
       calcoffsets();
+    } else if (!sel && curr) {
+      sel = curr;
     }
     break;
   case XK_Tab:
